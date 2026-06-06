@@ -16,7 +16,16 @@ dependencies = [
 dev = [
     "pytest",
     "ruff",
+    "jupyter",
+    "duckdb",
+    "pandas",
+    "jupysql",
+    "duckdb-engine",
+    "toml"
 ]
+
+[tool.setuptools]
+packages = []
 
 [tool.ruff]
 line-length = 100

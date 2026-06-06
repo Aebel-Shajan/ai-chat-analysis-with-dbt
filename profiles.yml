@@ -1,0 +1,6 @@
+ai_chat_analysis:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: data/ai_chat.duckdb
