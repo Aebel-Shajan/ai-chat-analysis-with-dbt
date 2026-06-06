@@ -1,10 +1,8 @@
-{{ config(materialized='view') }}
-
 with unnested as (
     select
         uuid                                        as conversation_id,
         unnest(chat_messages)                       as msg
-    from {{ ref('raw_conversations') }}
+    from {{ ref('raw_claude_chat') }}
 )
 
 select
