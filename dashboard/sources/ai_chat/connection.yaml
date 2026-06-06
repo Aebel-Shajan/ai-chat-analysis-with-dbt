@@ -1,0 +1,4 @@
+name: ai_chat
+type: duckdb
+options:
+  filename: ../../../data/ai_chat.duckdb
