@@ -59,6 +59,8 @@ jobs:
             --region auto
 
   build:
+    needs: update-data
+    if: always()
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -67,29 +69,40 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Pull DuckDB from R2
+        id: pull-db
         run: |
           mkdir -p data
-          aws s3 cp s3://${{ secrets.R2_BUCKET }}/ai_chat.duckdb data/ai_chat.duckdb \
+          if aws s3 cp s3://${{ secrets.R2_BUCKET }}/ai_chat.duckdb data/ai_chat.duckdb \
             --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
-            --region auto
+            --region auto; then
+            echo "pulled=true" >> $GITHUB_OUTPUT
+          else
+            echo "No DuckDB in R2 yet, skipping build"
+            echo "pulled=false" >> $GITHUB_OUTPUT
+          fi
 
       - uses: actions/setup-node@v4
+        if: steps.pull-db.outputs.pulled == 'true'
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: dashboard/package-lock.json
 
       - name: Install Evidence dependencies
+        if: steps.pull-db.outputs.pulled == 'true'
         working-directory: dashboard
         run: npm ci
 
       - name: Build Evidence site
+        if: steps.pull-db.outputs.pulled == 'true'
         working-directory: dashboard
         run: npm run build
 
       - uses: actions/configure-pages@v4
+        if: steps.pull-db.outputs.pulled == 'true'
 
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pull-db.outputs.pulled == 'true'
         with:
           path: dashboard/build
 
