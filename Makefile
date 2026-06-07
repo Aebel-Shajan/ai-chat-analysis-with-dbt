@@ -9,7 +9,7 @@ export
 .DEFAULT_GOAL := help
 
 REPO_DIR     := $(shell pwd)
-PLIST_SRC    := launchctl/com.aebel.sync-claude-code.plist
+PLIST_SRC    := scripts/com.aebel.sync-claude-code.plist
 PLIST_DEST   := $(HOME)/Library/LaunchAgents/com.aebel.sync-claude-code.plist
 LAUNCH_LABEL := com.aebel.sync-claude-code
 
@@ -46,7 +46,7 @@ sync-claude-code: ## Manually run the Claude Code → R2 sync
 	$(PYTHON) scripts/sync_cc_projects_folder.py
 
 install-sync-cron: ## Install launchctl agent (runs sync every hour)
-	chmod +x launchctl/sync_cc_projects_folder.sh
+	chmod +x scripts/sync_cc_projects_folder.sh
 	sed "s|REPO_DIR|$(REPO_DIR)|g" $(PLIST_SRC) > $(PLIST_DEST)
 	launchctl load -w $(PLIST_DEST)
 	@echo "Installed: runs every hour. Logs → logs/sync_cc_projects_folder.{log,err}"
