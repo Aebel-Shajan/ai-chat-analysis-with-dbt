@@ -45,6 +45,8 @@ class R2Client:
     def create_bucket(self) -> None:
         """Create the bucket via the Cloudflare REST API (requires API token)."""
         s = self._settings
+        if not s.cloudflare_api_token:
+            raise RuntimeError("CLOUDFLARE_API_TOKEN is required to create a bucket")
         url = f"https://api.cloudflare.com/client/v4/accounts/{s.cloudflare_account_id}/r2/buckets"
         resp = requests.post(
             url,
