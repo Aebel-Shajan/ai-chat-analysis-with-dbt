@@ -83,6 +83,8 @@ class R2Client:
             for obj in page.get("Contents", []):
                 key = obj["Key"]
                 relative = key[len(prefix):].lstrip("/")
+                if not relative:  # skip folder placeholder objects
+                    continue
                 dest = local_dir / relative
                 self.download_file(key, dest)
                 print(f"  downloaded {key}")
