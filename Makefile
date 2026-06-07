@@ -17,7 +17,7 @@ LAUNCH_LABEL := com.aebel.sync-claude-code
         sync-claude-code install-sync-cron uninstall-sync-cron clean
 
 help:
-	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 setup-venv: ## Create the virtual environment
 	python3 -m venv $(VENV)
@@ -25,10 +25,6 @@ setup-venv: ## Create the virtual environment
 
 install: ## Install production + dev dependencies
 	$(PIP) install -e ".[dev]"
-
-extract: ## Extract raw JSON from zip into data/extracted/
-	$(PYTHON) scripts/extract_claude_chat.py
-	$(PYTHON) scripts/extract_claude_code.py
 
 create-bucket: ## Create R2 bucket if it doesn't exist
 	$(PYTHON) scripts/create_r2_bucket.py

@@ -2,7 +2,7 @@
 # Wrapper so launchctl picks up .env credentials before running the sync.
 set -e
 
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 if [ -f "$REPO_DIR/.env" ]; then
     set -a
