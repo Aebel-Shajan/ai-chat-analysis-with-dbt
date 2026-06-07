@@ -17,7 +17,7 @@ LAUNCH_LABEL := com.aebel.sync-claude-code
         sync-claude-code install-sync-cron uninstall-sync-cron clean
 
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
 
 setup-venv: ## Create the virtual environment
 	python3 -m venv $(VENV)
@@ -42,6 +42,7 @@ dbt-run: ## Run all dbt models
 dbt-docs: ## Generate and serve dbt docs (includes lineage DAG)
 	$(DBT) docs generate && $(DBT) docs serve
 
+# Cron job stuff
 sync-claude-code: ## Manually run the Claude Code → R2 sync
 	$(PYTHON) scripts/sync_cc_projects_folder.py
 
