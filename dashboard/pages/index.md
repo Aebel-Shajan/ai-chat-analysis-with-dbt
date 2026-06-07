@@ -33,6 +33,72 @@ group by 1
 order by 1
 ```
 
+---
+title: Usage Heatmap
+---
+
+```sql available_years
+select distinct extract(year from created_at)::int as year
+from ai_chat.claude_messages
+union
+select distinct extract(year from created_at)::int
+from ai_chat.cc_messages
+order by 1 desc
+```
+
+<Dropdown
+    name=year
+    data={available_years}
+    value=year
+    title="Year"
+    defaultValue="2024"
+    noDefault=true
+/>
+
+```sql chat_daily
+select
+    created_at::date as date,
+    count(*) as messages
+from ai_chat.claude_messages
+where sender = 'human'
+  and created_at >= '${inputs.dates.start}'
+  and created_at <= '${inputs.dates.end}'
+  and extract(year from created_at) = ${inputs.year.value}
+group by 1
+order by 1
+```
+
+```sql cc_daily
+select
+    created_at::date as date,
+    count(*) as messages
+from ai_chat.cc_messages
+where role = 'user'
+  and created_at >= '${inputs.dates.start}'
+  and created_at <= '${inputs.dates.end}'
+  and extract(year from created_at) = ${inputs.year.value}
+group by 1
+order by 1
+```
+
+## Claude Chat
+
+<CalendarHeatmap
+    data={chat_daily}
+    date=date
+    value=messages
+    title="Daily Claude Chat Messages"
+/>
+
+## Claude Code
+
+<CalendarHeatmap
+    data={cc_daily}
+    date=date
+    value=messages
+    title="Daily Claude Code Messages"
+/>
+
 ## Messages Over Time
 
 <BarChart
@@ -42,10 +108,6 @@ order by 1
     type=stacked
 />
 
-## Most Active Conversations
-
-<DataTable data={top_conversations} />
-
 ## Activity by Hour of Day
 
 <BarChart
@@ -53,3 +115,7 @@ order by 1
     x=hour
     y=messages
 />
+
+## Most Active Conversations
+
+<DataTable data={top_conversations} />
