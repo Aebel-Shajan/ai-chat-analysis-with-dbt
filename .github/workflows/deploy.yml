@@ -96,7 +96,7 @@ jobs:
       - name: Build Evidence site
         if: steps.pull-db.outputs.pulled == 'true'
         working-directory: dashboard
-        run: npm run build
+        run: npm run sources && npm run build
 
       - uses: actions/configure-pages@v4
         if: steps.pull-db.outputs.pulled == 'true'
