@@ -10,4 +10,4 @@ if [ -f "$REPO_DIR/.env" ]; then
     set +a
 fi
 
-exec "$REPO_DIR/.venv/bin/python" "$REPO_DIR/scripts/sync_claude_code.py"
+exec "$REPO_DIR/.venv/bin/python" "$REPO_DIR/scripts/sync_cc_projects_folder.py"

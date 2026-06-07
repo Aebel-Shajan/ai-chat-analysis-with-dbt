@@ -43,13 +43,13 @@ dbt-docs: ## Generate and serve dbt docs (includes lineage DAG)
 	$(DBT) docs generate && $(DBT) docs serve
 
 sync-claude-code: ## Manually run the Claude Code → R2 sync
-	$(PYTHON) scripts/sync_claude_code.py
+	$(PYTHON) scripts/sync_cc_projects_folder.py
 
 install-sync-cron: ## Install launchctl agent (runs sync every hour)
-	chmod +x launchctl/sync_claude_code.sh
+	chmod +x launchctl/sync_cc_projects_folder.sh
 	sed "s|REPO_DIR|$(REPO_DIR)|g" $(PLIST_SRC) > $(PLIST_DEST)
 	launchctl load -w $(PLIST_DEST)
-	@echo "Installed: runs every hour. Logs → logs/sync_claude_code.{log,err}"
+	@echo "Installed: runs every hour. Logs → logs/sync_cc_projects_folder.{log,err}"
 
 uninstall-sync-cron: ## Remove launchctl agent
 	launchctl unload -w $(PLIST_DEST)

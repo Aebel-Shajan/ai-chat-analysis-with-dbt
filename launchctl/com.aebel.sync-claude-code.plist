@@ -8,17 +8,17 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>REPO_DIR/launchctl/sync_claude_code.sh</string>
+        <string>REPO_DIR/launchctl/sync_cc_projects_folder.sh</string>
     </array>
 
     <key>StartInterval</key>
     <integer>3600</integer>
 
     <key>StandardOutPath</key>
-    <string>REPO_DIR/logs/sync_claude_code.log</string>
+    <string>REPO_DIR/logs/sync_cc_projects_folder.log</string>
 
     <key>StandardErrorPath</key>
-    <string>REPO_DIR/logs/sync_claude_code.err</string>
+    <string>REPO_DIR/logs/sync_cc_projects_folder.err</string>
 
     <key>RunAtLoad</key>
     <true/>
