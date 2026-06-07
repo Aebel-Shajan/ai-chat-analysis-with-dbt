@@ -8,7 +8,13 @@ export
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup-venv install extract create-bucket set-gh-secrets dbt-run dbt-docs clean
+REPO_DIR     := $(shell pwd)
+PLIST_SRC    := launchctl/com.aebel.sync-claude-code.plist
+PLIST_DEST   := $(HOME)/Library/LaunchAgents/com.aebel.sync-claude-code.plist
+LAUNCH_LABEL := com.aebel.sync-claude-code
+
+.PHONY: help setup-venv install extract create-bucket set-gh-secrets dbt-run dbt-docs \
+        sync-claude-code install-sync-cron uninstall-sync-cron clean
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
@@ -35,6 +41,20 @@ dbt-run: ## Run all dbt models
 
 dbt-docs: ## Generate and serve dbt docs (includes lineage DAG)
 	$(DBT) docs generate && $(DBT) docs serve
+
+sync-claude-code: ## Manually run the Claude Code → R2 sync
+	$(PYTHON) scripts/sync_claude_code.py
+
+install-sync-cron: ## Install launchctl agent (runs sync every hour)
+	chmod +x launchctl/sync_claude_code.sh
+	sed "s|REPO_DIR|$(REPO_DIR)|g" $(PLIST_SRC) > $(PLIST_DEST)
+	launchctl load -w $(PLIST_DEST)
+	@echo "Installed: runs every hour. Logs → logs/sync_claude_code.{log,err}"
+
+uninstall-sync-cron: ## Remove launchctl agent
+	launchctl unload -w $(PLIST_DEST)
+	rm -f $(PLIST_DEST)
+	@echo "Uninstalled."
 
 clean: ## Remove the virtual environment
 	rm -rf $(VENV)
