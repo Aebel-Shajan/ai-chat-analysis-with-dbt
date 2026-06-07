@@ -50,7 +50,7 @@ jobs:
             || echo "No existing DB in R2, starting fresh"
 
       - name: Run dbt
-        run: dbt run
+        run: dbt run --project-dir dbt --profiles-dir dbt
 
       - name: Push DuckDB to R2
         run: |
