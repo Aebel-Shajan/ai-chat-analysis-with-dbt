@@ -1,0 +1,7 @@
+claude_chat_r2_raw_prefix: claude_chat/raw
+claude_chat_r2_output_prefix: claude_chat/extracted
+claude_chat_local_tmp_dir: data/tmp/claude_chat
+
+claude_code_r2_projects_prefix: claude_code/projects
+claude_code_r2_output_key: claude_code/messages.jsonl
+claude_code_local_tmp_dir: data/tmp/claude_code

@@ -1,35 +1,39 @@
-"""Extract raw JSON files from the Claude export zip into data/extracted/."""
-
-import zipfile
+import sys
 from pathlib import Path
 
-RAW_DIR = Path(__file__).parent.parent / "data" / "raw"
-OUT_DIR = Path(__file__).parent.parent / "data" / "extracted"
+from ai_chat_analysis import config as cfg
+from ai_chat_analysis.extract_claude_chat import extract
+from ai_chat_analysis.r2 import R2Client
+from ai_chat_analysis.settings import R2Settings
 
-FILES_TO_EXTRACT = ["conversations.json", "users.json", "memories.json"]
+ROOT = Path(__file__).parent.parent
 
 
 def main() -> None:
-    zips = list(RAW_DIR.glob("*.zip"))
-    if not zips:
-        raise FileNotFoundError(f"No zip files found in {RAW_DIR}")
+    conf = cfg.load()
+    client = R2Client(R2Settings())
 
-    zip_path = zips[0]
-    print(f"Extracting {zip_path.name} ...")
+    print("Verifying R2 credentials...")
+    try:
+        client.verify()
+    except ValueError as e:
+        print(f"ERROR: {e}")
+        sys.exit(1)
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    tmp_raw = ROOT / conf.claude_chat_local_tmp_dir / "raw"
+    tmp_out = ROOT / conf.claude_chat_local_tmp_dir / "extracted"
 
-    with zipfile.ZipFile(zip_path) as zf:
-        available = {Path(name).name: name for name in zf.namelist()}
-        for filename in FILES_TO_EXTRACT:
-            if filename not in available:
-                print(f"  skip {filename} (not in zip)")
-                continue
-            dest = OUT_DIR / filename
-            dest.write_bytes(zf.read(available[filename]))
-            print(f"  wrote {dest.relative_to(Path.cwd())}")
+    print(f"Downloading {conf.claude_chat_r2_raw_prefix}/ from R2...")
+    tmp_raw.mkdir(parents=True, exist_ok=True)
+    count = client.download_prefix(conf.claude_chat_r2_raw_prefix, tmp_raw)
+    print(f"Downloaded {count} files.")
 
-    print("Done.")
+    print("Extracting...")
+    extract(raw_dir=tmp_raw, out_dir=tmp_out)
+
+    print(f"Uploading extracted files to {conf.claude_chat_r2_output_prefix}/ in R2...")
+    uploaded, skipped = client.sync_dir(tmp_out, conf.claude_chat_r2_output_prefix)
+    print(f"Done. {uploaded} uploaded, {skipped} unchanged.")
 
 
 if __name__ == "__main__":

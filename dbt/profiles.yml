@@ -1,0 +1,14 @@
+ai_chat_analysis:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: data/ai_chat.duckdb
+      extensions:
+        - httpfs
+      settings:
+        s3_endpoint: "{{ env_var('CLOUDFLARE_ACCOUNT_ID') }}.r2.cloudflarestorage.com"
+        s3_access_key_id: "{{ env_var('R2_ACCESS_KEY_ID') }}"
+        s3_secret_access_key: "{{ env_var('R2_SECRET_ACCESS_KEY') }}"
+        s3_region: auto
+        s3_url_style: path

@@ -1,0 +1,90 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Extract Claude chat data
+        run: python scripts/extract_claude_chat.py
+
+      - name: Extract Claude Code data
+        run: python scripts/extract_claude_code.py
+
+      - name: Pull DuckDB from R2
+        run: |
+          mkdir -p data
+          aws s3 cp s3://$R2_BUCKET/ai_chat.duckdb data/ai_chat.duckdb \
+            --endpoint-url https://$CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com \
+            --region auto \
+            || echo "No existing DB in R2, starting fresh"
+
+      - name: Run dbt
+        run: make dbt-run
+
+      - name: Push DuckDB to R2
+        run: |
+          aws s3 cp data/ai_chat.duckdb s3://$R2_BUCKET/ai_chat.duckdb \
+            --endpoint-url https://$CLOUDFLARE_ACCOUNT_ID.r2.cloudflarestorage.com \
+            --region auto
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install Evidence dependencies
+        working-directory: dashboard
+        run: npm ci
+
+      - name: Build Evidence site
+        working-directory: dashboard
+        run: npm run build
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
