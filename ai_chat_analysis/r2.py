@@ -73,6 +73,20 @@ class R2Client:
                 return None
             raise
 
+    def download_prefix(self, prefix: str, local_dir: Path) -> int:
+        """Download all objects under prefix into local_dir. Returns file count."""
+        paginator = self._s3.get_paginator("list_objects_v2")
+        count = 0
+        for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+            for obj in page.get("Contents", []):
+                key = obj["Key"]
+                relative = key[len(prefix):].lstrip("/")
+                dest = local_dir / relative
+                self.download_file(key, dest)
+                print(f"  downloaded {key}")
+                count += 1
+        return count
+
     def sync_dir(self, local_dir: Path, prefix: str) -> tuple[int, int]:
         """Upload files under local_dir to R2 prefix, skipping unchanged files.
 

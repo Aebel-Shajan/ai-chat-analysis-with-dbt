@@ -13,6 +13,7 @@ dependencies = [
     "boto3",
     "requests",
     "pydantic-settings",
+    "pyyaml",
 ]
 
 [project.optional-dependencies]
