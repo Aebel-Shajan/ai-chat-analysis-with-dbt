@@ -33,10 +33,10 @@ set-gh-secrets: ## Set GitHub secrets from .env
 	sh scripts/set_gh_secrets.sh
 
 dbt-run: ## Run all dbt models
-	$(DBT) run
+	dbt run --project-dir dbt --profiles-dir dbt
 
 dbt-docs: ## Generate and serve dbt docs (includes lineage DAG)
-	$(DBT) docs generate && $(DBT) docs serve
+	dbt docs generate && dbt docs serve --project-dir dbt --profiles-dir dbt
 
 # Cron job stuff
 sync-claude-code: ## Manually run the Claude Code → R2 sync
